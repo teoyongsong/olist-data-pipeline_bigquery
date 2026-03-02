@@ -1,0 +1,14 @@
+# Conda environment for Olist E-Commerce Data Pipeline (BigQuery)
+# Create: conda env create -f environment.yml
+# Activate: conda activate olist-bq
+
+name: olist-bq
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - -r requirements.txt
+    - dbt-bigquery

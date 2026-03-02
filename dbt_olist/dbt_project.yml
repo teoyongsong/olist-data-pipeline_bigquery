@@ -1,0 +1,28 @@
+name: "olist_dw"
+version: "1.0.0"
+config-version: 2
+
+profile: "olist_dw"
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  raw_schema: raw_olist
+  dw_schema: dw_dw
+
+models:
+  olist_dw:
+    staging:
+      +schema: dw_stg_olist
+      +materialized: view
+    marts:
+      +schema: dw_dw
+      +materialized: table

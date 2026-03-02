@@ -1,0 +1,26 @@
+# Environment
+.venv/
+venv/
+.env
+*.pyc
+__pycache__/
+
+# Data
+data/olist/*.csv
+!data/olist/.gitkeep
+
+# dbt
+dbt_olist/target/
+dbt_olist/dbt_packages/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Orchestration logs
+logs/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

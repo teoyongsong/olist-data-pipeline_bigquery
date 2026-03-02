@@ -1,0 +1,18 @@
+# dbt BigQuery profile. Set BQ_PROJECT in env or override below.
+# Auth: gcloud auth application-default login
+# Or set GOOGLE_APPLICATION_CREDENTIALS to a service account JSON path.
+
+olist_dw:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      # Authentication method:
+      # - Use "oauth" with gcloud auth application-default login
+      # - Or switch to "service-account" and set keyfile below
+      method: oauth
+      project: "{{ env_var('BQ_PROJECT', 'your-gcp-project-id') }}"
+      dataset: dw_dw
+      threads: 4
+      # Optional: service account key path
+      # keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
