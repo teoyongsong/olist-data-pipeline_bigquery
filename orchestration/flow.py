@@ -10,9 +10,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 sys.path.insert(0, ROOT)
 
+USE_GCS_INGEST = os.environ.get("USE_GCS_INGEST", "0").strip().lower() in ("1", "true", "yes")
+
 
 def ingest():
-    subprocess.run([sys.executable, "ingestion/ingest_raw_olist.py"], check=True, cwd=ROOT)
+    script = (
+        "gcs_pipeline/upload_and_ingest_raw_olist.py"
+        if USE_GCS_INGEST
+        else "ingestion/ingest_raw_olist.py"
+    )
+    subprocess.run([sys.executable, script], check=True, cwd=ROOT)
 
 
 def dbt_run():

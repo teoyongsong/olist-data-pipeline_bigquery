@@ -48,8 +48,13 @@ Download the [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.c
 ### 4. Run the pipeline
 
 ```bash
-# Upload CSVs to BigQuery raw_olist
+# Option A: Direct upload from local disk -> BigQuery raw_olist
 python ingestion/ingest_raw_olist.py
+
+# Option B (next version): Upload CSVs to GCS, then ingest into BigQuery
+# 1) Set GCS_BUCKET (and optionally GCS_PREFIX) in .env
+# 2) Run:
+python gcs_pipeline/upload_and_ingest_raw_olist.py
 
 # dbt: install packages, build staging + marts, run tests
 cd dbt_olist && dbt deps && dbt run && dbt test && cd ..

@@ -127,6 +127,10 @@ You should see the files listed above (or at least the ones used by the pipeline
 
 ## Step 7: Ingest raw data into BigQuery
 
+You have **two options** for ingestion:
+
+### Option A: Direct upload from local disk (current behavior)
+
 From the **project root** (with `olist-bq` activated and `.env` set):
 
 ```bash
@@ -136,6 +140,39 @@ python ingestion/ingest_raw_olist.py
 **Expected:** Messages like “Loaded N rows into …” for each CSV. The script creates the `raw_olist` dataset if it does not exist.
 
 **If it fails:** Check `BQ_PROJECT`, `DATA_DIR`, and GCP auth (Step 5).
+
+### Option B: Upload to GCS, then ingest into BigQuery (next version)
+
+1. In `.env`, set:
+
+   ```bash
+   GCS_BUCKET=your-gcs-bucket-name   # must already exist in GCP
+   GCS_PREFIX=olist_raw              # or any prefix you prefer
+   ```
+
+2. From the **project root**:
+
+   ```bash
+   python gcs_pipeline/upload_and_ingest_raw_olist.py
+   ```
+
+   This will:
+   - Upload CSVs from `DATA_DIR` to `gs://$GCS_BUCKET/$GCS_PREFIX/…`
+   - Use BigQuery load jobs to create/replace tables in `raw_olist`.
+
+3. **Optional:** To have the orchestrated flow use the GCS-based ingestion, set:
+
+   ```bash
+   export USE_GCS_INGEST=1
+   ```
+
+   Then later, when you run:
+
+   ```bash
+   python orchestration/flow.py
+   ```
+
+   it will call the GCS-based ingestion script instead of the direct one.
 
 ---
 
