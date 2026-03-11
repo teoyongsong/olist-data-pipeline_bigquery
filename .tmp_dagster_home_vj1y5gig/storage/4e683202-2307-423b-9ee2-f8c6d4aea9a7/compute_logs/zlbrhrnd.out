@@ -1,0 +1,9 @@
+Loaded 99441 rows into olistdatapipelinebigquery.raw_olist.customers
+Loaded 99441 rows into olistdatapipelinebigquery.raw_olist.orders
+Loaded 112650 rows into olistdatapipelinebigquery.raw_olist.order_items
+Loaded 103886 rows into olistdatapipelinebigquery.raw_olist.order_payments
+Loaded 32951 rows into olistdatapipelinebigquery.raw_olist.products
+Loaded 3095 rows into olistdatapipelinebigquery.raw_olist.sellers
+Loaded 1000163 rows into olistdatapipelinebigquery.raw_olist.geolocation
+Loaded 99224 rows into olistdatapipelinebigquery.raw_olist.order_reviews
+Ingestion complete.

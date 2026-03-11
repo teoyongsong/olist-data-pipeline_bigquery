@@ -73,6 +73,41 @@ Open `analysis/eda_and_metrics.ipynb` and run all cells (uses `pandas_gbq` and c
 python orchestration/flow.py
 ```
 
+### 7. Run the pipeline with Dagster
+
+From the project root, with `.env` loaded:
+
+```bash
+cd olist-data-pipeline_bigquery
+conda activate olist-bq
+set -a && source .env && set +a
+```
+
+**Option A – Dagster UI (recommended)**  
+Start the Dagster process and open the UI; then run the job from the UI:
+
+```bash
+dagster dev -f orchestration/dagster_olist/definitions.py
+```
+
+In the UI, open **Jobs** → **olist_elt_job** → **Launch run**.
+
+**Option B – Run job from CLI**
+
+- Local ingestion (default):
+
+  ```bash
+  dagster job execute -f orchestration/dagster_olist/definitions.py -j olist_elt_job
+  ```
+
+- GCS ingestion:
+
+  ```bash
+  USE_GCS_INGEST=1 dagster job execute -f orchestration/dagster_olist/definitions.py -j olist_elt_job
+  ```
+
+The Dagster job runs: **ingest** → **dbt run** → **dbt test** → **data_quality**. Ingestion uses `ingestion/ingest_raw_olist.py` unless `USE_GCS_INGEST=1`, in which case it uses `gcs_pipeline/upload_and_ingest_raw_olist.py`.
+
 ## Project structure
 
 ```
@@ -95,7 +130,11 @@ olist-data-pipeline_bigquery/
 ├── analysis/
 │   └── eda_and_metrics.ipynb
 ├── orchestration/
-│   └── flow.py
+│   ├── flow.py
+│   ├── dagster_olist/
+│   │   └── definitions.py   # Dagster job: ingest → dbt → data_quality
+│   ├── ingest_local_from_kaggle.sh
+│   └── ingest_gcs_from_kaggle.sh
 └── docs/
     └── schema.md
 ```

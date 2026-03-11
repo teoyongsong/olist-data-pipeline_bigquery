@@ -1,0 +1,72 @@
+version: 1
+project_id: olist_meltano
+
+plugins:
+  extractors:
+    - name: tap-csv
+      variant: singer-io
+      pip_url: tap-csv
+      config:
+        files:
+          - entity: customers
+            path: ../data/olist/olist_customers_dataset.csv
+            keys:
+              - customer_id
+          - entity: orders
+            path: ../data/olist/olist_orders_dataset.csv
+            keys:
+              - order_id
+          - entity: order_items
+            path: ../data/olist/olist_order_items_dataset.csv
+            keys:
+              - order_id
+              - order_item_id
+          - entity: order_payments
+            path: ../data/olist/olist_order_payments_dataset.csv
+            keys:
+              - order_id
+          - entity: products
+            path: ../data/olist/olist_products_dataset.csv
+            keys:
+              - product_id
+          - entity: sellers
+            path: ../data/olist/olist_sellers_dataset.csv
+            keys:
+              - seller_id
+          - entity: geolocation
+            path: ../data/olist/olist_geolocation_dataset.csv
+            keys:
+              - geolocation_zip_code_prefix
+          - entity: order_reviews
+            path: ../data/olist/olist_order_reviews_dataset.csv
+            keys:
+              - review_id
+
+  loaders:
+    - name: target-bigquery
+      variant: meltanolabs
+      pip_url: pipelinewise-target-bigquery
+      config:
+        project_id: module-2-olist-project
+        dataset: raw_olist
+        location: US
+        add_metadata_columns: false
+        # If GOOGLE_APPLICATION_CREDENTIALS is unset, target-bigquery will rely on
+        # Application Default Credentials from `gcloud auth application-default login`.
+        credentials_path: ${GOOGLE_APPLICATION_CREDENTIALS}
+
+jobs:
+  - name: csv_to_bigquery_raw
+    tasks:
+      - tap-csv target-bigquery
+
+environments:
+  - name: dev
+    config:
+      plugins:
+        loaders:
+          - name: target-bigquery
+            config:
+              project_id: module-2-olist-project
+              dataset: raw_olist
+

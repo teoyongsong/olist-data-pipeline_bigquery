@@ -69,6 +69,8 @@ def load_from_gcs(
         source_format=bigquery.SourceFormat.CSV,
         skip_leading_rows=1,
         autodetect=True,
+        allow_quoted_newlines=True,
+        max_bad_records=1000,
         write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
     )
     print(f"Loading {uri} into {table_id} ...")

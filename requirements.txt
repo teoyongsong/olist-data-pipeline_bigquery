@@ -26,6 +26,11 @@ db-dtypes>=1.2.0
 
 # Orchestration (optional)
 prefect>=2.14.0
+dagster>=1.7.0
+dagster-webserver>=1.7.0
+
+# Meltano CLI (for tap-csv -> target-bigquery pipeline)
+meltano>=3.0.0
 
 # Environment (optional)
 python-dotenv>=1.0.0

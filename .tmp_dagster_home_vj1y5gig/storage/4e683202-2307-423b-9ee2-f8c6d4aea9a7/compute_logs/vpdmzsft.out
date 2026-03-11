@@ -1,0 +1,4 @@
+[0m21:58:53  Running with dbt=1.11.6
+[0m21:58:59  Registered adapter: bigquery=1.11.0
+[0m21:59:01  Found 10 models, 8 sources, 653 macros
+[0m21:59:01  Nothing to do. Try checking your model configs and model specification args
