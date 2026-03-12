@@ -4,6 +4,9 @@ venv/
 .env
 *.pyc
 __pycache__/
+.tmp_dagster_home_1nf6vrcv
+.tmp_dagster_home_p6pbcqjt
+.tmp_dagster_home_vj1y5gig
 
 # Data
 data/olist/*.csv
