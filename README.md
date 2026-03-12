@@ -2,7 +2,11 @@
 
 Same pipeline as the PostgreSQL version, but **CSVs are uploaded to Google BigQuery** and the star schema is built in BigQuery using dbt-bigquery.
 
-**→ [Step-by-step process to complete the project](docs/STEP_BY_STEP.md)**
+**→ [Step-by-step process](docs/STEP_BY_STEP.md)**  
+**→ [Architecture overview](docs/ARCHITECTURE.md)**  
+**→ [User manual](docs/USER_MANUAL.md)**  
+**→ [Analysis report](docs/ANALYSIS_REPORT.md)**  
+**→ [Slide deck outline](docs/SLIDES_OUTLINE.md)**
 
 ## Prerequisites
 
@@ -136,7 +140,12 @@ olist-data-pipeline_bigquery/
 │   ├── ingest_local_from_kaggle.sh
 │   └── ingest_gcs_from_kaggle.sh
 └── docs/
-    └── schema.md
+    ├── schema.md
+    ├── ARCHITECTURE.md
+    ├── USER_MANUAL.md
+    ├── STEP_BY_STEP.md
+    ├── ANALYSIS_REPORT.md
+    └── SLIDES_OUTLINE.md
 ```
 
 ## Schema
