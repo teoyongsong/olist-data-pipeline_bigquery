@@ -414,9 +414,9 @@
         ‹ Prev <span class="key">←</span>
       </button>
       <button id="next-btn">
-        <span class="key">→</span> Next ›
+        <span class="key">→ / ↓</span> Next ›
       </button>
-      <div class="hint">Use arrow keys or buttons to navigate</div>
+      <div class="hint">Use ← / → / ↑ / ↓ keys, mouse wheel, or buttons to navigate</div>
     </div>
   </footer>
 </div>
@@ -941,9 +941,29 @@
   nextBtn.addEventListener("click", function() { go(1); });
 
   document.addEventListener("keydown", function(e) {
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+    const k = e.key || "";
+    const code = e.code || "";
+    const keyCode = e.keyCode;
+
+    const nextKeys = (
+      k === "ArrowRight" || k === "Right" ||
+      k === "ArrowDown"  || k === "Down"  ||
+      code === "ArrowRight" || code === "ArrowDown" ||
+      keyCode === 39 || keyCode === 40
+    );
+
+    const prevKeys = (
+      k === "ArrowLeft" || k === "Left" ||
+      k === "ArrowUp"   || k === "Up"   ||
+      code === "ArrowLeft" || code === "ArrowUp" ||
+      keyCode === 37 || keyCode === 38
+    );
+
+    if (nextKeys) {
+      e.preventDefault();
       go(1);
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    } else if (prevKeys) {
+      e.preventDefault();
       go(-1);
     }
   });
