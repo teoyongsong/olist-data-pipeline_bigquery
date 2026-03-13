@@ -1,17 +1,0 @@
-[32m2026-03-11 05:56:45 +0800[0m - dagster - [34mDEBUG[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - 74902 - LOGS_CAPTURED - Started capturing logs in process (pid: 74902).
-[32m2026-03-11 05:56:45 +0800[0m - dagster - [34mDEBUG[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - 74902 - ingest_op - STEP_START - Started execution of step "ingest_op".
-[32m2026-03-11 05:56:45 +0800[0m - dagster - [34mINFO[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - ingest_op - Running ingestion: ingestion/ingest_raw_olist.py (USE_GCS_INGEST=False)
-/home/teoyongsong/miniconda3/envs/olist-bq/lib/python3.10/site-packages/google/api_core/_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.19) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
-  warnings.warn(message, FutureWarning)
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 21845.33it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 32513.98it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 33825.03it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 8371.86it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 22795.13it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 23696.63it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 25731.93it/s]
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 27235.74it/s]
-[32m2026-03-11 05:58:07 +0800[0m - dagster - [34mDEBUG[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - 74902 - ingest_op - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
-[32m2026-03-11 05:58:07 +0800[0m - dagster - [34mDEBUG[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - ingest_op - Writing file at: /home/teoyongsong/olist-data-pipeline_bigquery/.tmp_dagster_home_vj1y5gig/storage/4e683202-2307-423b-9ee2-f8c6d4aea9a7/ingest_op/result using PickledObjectFilesystemIOManager...
-[32m2026-03-11 05:58:07 +0800[0m - dagster - [34mDEBUG[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - 74902 - ingest_op - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
-[32m2026-03-11 05:58:07 +0800[0m - dagster - [34mDEBUG[0m - olist_elt_job - 4e683202-2307-423b-9ee2-f8c6d4aea9a7 - 74902 - ingest_op - STEP_SUCCESS - Finished execution of step "ingest_op" in 1m24s.
