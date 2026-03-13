@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Olist BigQuery Data Pipeline – Findings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050716;
+      --card: #0b1024;
+      --accent: #6df0ff;
+      --accent-soft: rgba(109, 240, 255, 0.12);
+      --text-main: #f7f7ff;
+      --text-muted: #a1a5c2;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --danger: #ff6b8b;
+      --success: #6bffb1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #191d3e 0, #050716 55%);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .deck {
+      width: 100%;
+      max-width: 1200px;
+      padding: 24px 32px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    header.deck-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 20% 20%, #ffffff 0, transparent 45%),
+        radial-gradient(circle at 80% 20%, #6df0ff 0, transparent 55%),
+        linear-gradient(145deg, #151a39 0, #2d3b7a 45%, #6df0ff 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 18px 35px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .meta-tag {
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      background: rgba(8, 230, 255, 0.04);
+      color: var(--accent);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .slide {
+      flex: 1;
+      border-radius: 20px;
+      background: radial-gradient(circle at top, #151b3b 0, #060818 55%);
+      border: 1px solid var(--border-subtle);
+      padding: 26px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.02);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(circle at 10% -10%, rgba(109, 240, 255, 0.13) 0, transparent 45%),
+        radial-gradient(circle at 80% 120%, rgba(255, 107, 185, 0.15) 0, transparent 50%);
+      opacity: 0.9;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .slide-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      height: 100%;
+    }
+
+    .slide-kicker {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-kicker::before {
+      content: "";
+      width: 32px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0, var(--accent) 60%, transparent 100%);
+      opacity: 0.75;
+    }
+
+    .slide-title {
+      font-size: 32px;
+      line-height: 1.2;
+      font-weight: 600;
+    }
+
+    .slide-subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 720px;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.3fr);
+      gap: 18px;
+      margin-top: 6px;
+    }
+
+    .col {
+      background: radial-gradient(circle at top left, rgba(10, 18, 56, 0.9) 0, rgba(3, 5, 18, 0.9) 50%);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      padding: 14px 16px 12px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .col h3 {
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .col p {
+      font-size: 17px;
+      color: var(--text-main);
+    }
+
+    ul {
+      list-style: none;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    li {
+      font-size: 17px;
+      color: var(--text-main);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    li::before {
+      content: "•";
+      color: var(--accent);
+      margin-top: 2px;
+      font-size: 14px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-size: 13px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      background: rgba(7, 10, 30, 0.85);
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .metric-note {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .slide-chart .slide-body {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+
+    .chart-wrap {
+      min-height: 320px;
+      padding: 12px 0;
+      position: relative;
+    }
+
+    .chart-wrap canvas {
+      max-height: 340px;
+    }
+
+    .chart-finding {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      max-width: 720px;
+    }
+
+    footer.deck-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav button {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(10, 16, 48, 0.9);
+      color: var(--text-main);
+      padding: 8px 14px;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      outline: none;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+    }
+
+    .nav button span.key {
+      font-size: 13px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--accent);
+      background: rgba(3, 6, 18, 0.96);
+    }
+
+    .nav button:disabled {
+      opacity: 0.35;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .nav button:not(:disabled):hover {
+      transform: translateY(-1px);
+      background: rgba(17, 28, 78, 0.95);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav button:not(:disabled):active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .slide-index {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .hint {
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .slide-body {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .deck {
+        padding: 14px 16px 12px;
+      }
+      .slide {
+        padding: 20px 18px;
+        border-radius: 16px;
+      }
+      .slide-title {
+        font-size: 26px;
+      }
+      .slide-subtitle {
+        font-size: 16px;
+      }
+      header.deck-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .meta {
+        flex-wrap: wrap;
+      }
+      .chart-wrap {
+        min-height: 260px;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="deck">
+  <header class="deck-header">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <h1>Olist BigQuery Pipeline</h1>
+        <div style="font-size:15px;color:var(--text-muted);margin-top:2px;">
+          From raw Kaggle CSVs to analytics-ready metrics
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="meta-tag">Findings Deck</span>
+      <span>Environment: <strong>GCP BigQuery</strong></span>
+      <span>Orchestration: <strong>Prefect + Dagster</strong></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="slide" id="slide">
+      <div class="slide-inner" id="slide-inner">
+        <!-- Filled by JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="deck-footer">
+    <div class="slide-index" id="slide-index">Slide 1 / 14</div>
+    <div class="nav">
+      <button id="prev-btn">
+        ‹ Prev <span class="key">←</span>
+      </button>
+      <button id="next-btn">
+        <span class="key">→</span> Next ›
+      </button>
+      <div class="hint">Use arrow keys or buttons to navigate</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const slides = [
+    {
+      kicker: "Slide 1",
+      title: "Project Overview",
+      subtitle: "Olist e‑commerce data pipeline from Kaggle CSVs into a BigQuery warehouse, exposing three core business metrics plus delivery performance.",
+      left: {
+        heading: "Problem",
+        items: [
+          "Olist data is delivered as multiple CSVs; analysts need a single, trusted warehouse.",
+          "Business wants consistent metrics for growth, category performance, and customer behavior.",
+          "Data quality and repeatable orchestration are required for ongoing analytics."
+        ]
+      },
+      right: {
+        heading: "Solution",
+        metrics: [
+          {
+            label: "Stack",
+            value: "GCS · BigQuery · dbt · Dagster · Prefect",
+            note: "Python-based ingestion and orchestration on top of GCP."
+          },
+          {
+            label: "Deliverables",
+            value: "Raw + DW + EDA",
+            note: "Raw layer (raw_olist), star schema (dw_dw), EDA notebook & docs."
+          }
+        ],
+        tags: ["BigQuery", "dbt", "Dagster", "Prefect", "Kaggle"]
+      }
+    },
+    {
+      kicker: "Slide 2",
+      title: "Dataset & Scope",
+      subtitle: "Brazilian E-Commerce Public Dataset by Olist, modeled into raw, staging, and marts in BigQuery.",
+      left: {
+        heading: "Source dataset",
+        items: [
+          "Kaggle dataset: customers, orders, order_items, payments, products, sellers, geolocation, reviews.",
+          "Local download into DATA_DIR (data/olist) and optional upload to GCS.",
+          "Environment variables configured via .env and config.py."
+        ]
+      },
+      right: {
+        heading: "Scope",
+        items: [
+          "Build raw_olist with 1:1 tables from the original CSVs.",
+          "Model staging views in dw_stg_olist and star-schema marts in dw_dw.",
+          "Expose 3 core business metrics in the EDA notebook, plus late-delivery KPIs."
+        ],
+        tags: ["raw_olist", "dw_stg_olist", "dw_dw", "DATA_DIR"]
+      }
+    },
+    {
+      kicker: "Slide 3",
+      title: "Architecture at a Glance",
+      subtitle: "ELT on GCP: local/GCS landing → BigQuery raw layer → dbt warehouse → quality checks → EDA notebook.",
+      left: {
+        heading: "Flow",
+        items: [
+          "Kaggle → ingest_*_from_kaggle.sh → local data/olist/*.csv.",
+          "Local path: ingestion/ingest_raw_olist.py → BigQuery raw_olist via pandas_gbq.",
+          "GCS path: gcs_pipeline/upload_and_ingest_raw_olist.py → GCS bucket → BigQuery load jobs."
+        ]
+      },
+      right: {
+        heading: "Transforms & consumption",
+        items: [
+          "dbt (dbt_olist/) builds staging and marts: dw_stg_olist, dw_dw.",
+          "Data-quality on raw_olist.order_items via ge_raw_order_items.py.",
+          "EDA & metrics: analysis/eda_and_metrics.ipynb queries dw_dw with pandas_gbq."
+        ],
+        tags: ["Architecture", "ELT", "GCS", "BigQuery", "dbt"]
+      }
+    },
+    {
+      kicker: "Slide 4",
+      title: "Ingestion Design: Local & GCS",
+      subtitle: "Two ingestion modes, controlled by environment and used consistently in scripts and orchestration.",
+      left: {
+        heading: "Local → BigQuery",
+        items: [
+          "ingestion/ingest_raw_olist.py reads each CSV into Pandas.",
+          "Writes into raw_olist.<table> using pandas_gbq.to_gbq with project_id=BQ_PROJECT.",
+          "Good for quick local runs and small-to-medium data volumes."
+        ]
+      },
+      right: {
+        heading: "Local → GCS → BigQuery",
+        items: [
+          "gcs_pipeline/upload_and_ingest_raw_olist.py uploads CSVs to gs://$GCS_BUCKET/$GCS_PREFIX/.",
+          "BigQuery load jobs use allow_quoted_newlines and max_bad_records to handle review text.",
+          "Same raw schema (raw_olist) regardless of ingestion mode."
+        ],
+        tags: ["GCS_BUCKET", "GCS_PREFIX", "pandas_gbq", "BigQuery Load Jobs"]
+      }
+    },
+    {
+      kicker: "Slide 5",
+      title: "dbt Warehouse & Star Schema",
+      subtitle: "Staging and marts built in BigQuery using dbt, feeding all downstream analysis.",
+      left: {
+        heading: "Datasets",
+        items: [
+          "raw_olist: raw tables 1:1 with Kaggle CSVs.",
+          "dw_stg_olist: normalized staging views (stg_customers, stg_orders, stg_order_items, etc.).",
+          "dw_dw: star-schema tables (dim_customer, dim_product, dim_seller, dim_date, fact_order_items)."
+        ]
+      },
+      right: {
+        heading: "dbt project",
+        items: [
+          "Models in dbt_olist/models/, with sources defined in models/sources.yml.",
+          "Tests (dbt test) for referential integrity, uniqueness, and not-null constraints.",
+          "Profiles configured via dbt_olist/profiles.yml using BQ_PROJECT and BigQuery OAuth/service-account auth."
+        ],
+        tags: ["dbt models", "sources.yml", "dbt test"]
+      }
+    },
+    {
+      kicker: "Slide 6",
+      title: "Metric #1 – Monthly Sales Trends",
+      subtitle: "Monthly revenue, order count, and items sold from the fact_order_items table in dw_dw.",
+      left: {
+        heading: "Definition",
+        items: [
+          "Query aggregates SUM(total_item_value) by DATE_TRUNC(order_date_key, MONTH).",
+          "Also counts distinct orders and total items sold.",
+          "Source: dw_dw.fact_order_items queried via pandas_gbq in the notebook."
+        ]
+      },
+      right: {
+        heading: "Findings",
+        metrics: [
+          {
+            label: "Pattern",
+            value: "Growth + seasonality",
+            note: "Strong ramp from late 2016 through 2017, with visible Q4 peaks."
+          },
+          {
+            label: "Usage",
+            value: "Capacity & planning",
+            note: "Helps forecast peaks in orders and revenue for operations teams."
+          }
+        ],
+        tags: ["Revenue trend", "Orders", "Items sold"]
+      }
+    },
+    {
+      kicker: "Slide 7",
+      title: "Metric #2 – Top Categories by Revenue",
+      subtitle: "Top 15 categories by total revenue, combining fact_order_items and dim_product.",
+      left: {
+        heading: "Definition",
+        items: [
+          "Join fact_order_items to dim_product on product_key.",
+          "Compute SUM(total_item_value) and COUNT(*) AS items_sold by product_category_name.",
+          "Order by revenue and take the top 15."
+        ]
+      },
+      right: {
+        heading: "Findings",
+        items: [
+          "Top categories: beleza_saude, relogios_presentes, cama_mesa_banho, esporte_lazer, and others.",
+          "Revenue is diversified across multiple verticals, not dominated by a single category.",
+          "Supports targeted merchandising and marketing strategies by segment."
+        ],
+        tags: ["Category mix", "Product strategy", "Revenue concentration"]
+      }
+    },
+    {
+      kicker: "Slide 8",
+      title: "Metric #3 – Customer Segmentation & CLV",
+      subtitle: "Segmentation by tenure and total revenue from dim_customer, used as a CLV proxy.",
+      left: {
+        heading: "Definition",
+        items: [
+          "dim_customer stores tenure_segment and total_revenue per customer.",
+          "Segments: New, Loyal, Established.",
+          "Notebook aggregates customers, total revenue, and average revenue per customer per segment."
+        ]
+      },
+      right: {
+        heading: "Findings",
+        metrics: [
+          {
+            label: "Avg. revenue per customer",
+            value: "≈ R$158–160",
+            note: "Very similar across New, Loyal, and Established segments."
+          },
+          {
+            label: "Revenue share",
+            value: "Heavily Established + Loyal",
+            note: "Majority of revenue comes from returning customers."
+          }
+        ],
+        tags: ["Segmentation", "CLV", "Retention"]
+      }
+    },
+    {
+      kicker: "Slide 9",
+      title: "Late Delivery Performance",
+      subtitle: "Using is_late_delivery flag in fact_order_items to quantify delivery reliability.",
+      left: {
+        heading: "Definition",
+        items: [
+          "Filter fact_order_items where delivery_date_key IS NOT NULL.",
+          "Compute late-delivery rate as items with is_late_delivery = TRUE over all delivered items.",
+          "Also compute revenue from late vs. on-time deliveries."
+        ]
+      },
+      right: {
+        heading: "Findings",
+        metrics: [
+          {
+            label: "Late delivery rate",
+            value: "~6.6% of items",
+            note: "Late items still account for ~R$1.15M of revenue."
+          },
+          {
+            label: "Impact",
+            value: "Customer satisfaction risk",
+            note: "Delays are known to reduce review scores and repeat purchases."
+          }
+        ],
+        tags: ["Delivery", "Operations", "SLAs"]
+      }
+    },
+    {
+      type: "chart",
+      kicker: "Business findings · Chart 1",
+      title: "Monthly Revenue Trend",
+      subtitle: "Revenue ramps from late 2016 through 2017 with clear Q4 peaks; supports capacity and seasonal planning.",
+      chartId: "monthly",
+      finding: "Strong growth and seasonality—use for demand forecasting and staffing."
+    },
+    {
+      type: "chart",
+      kicker: "Business findings · Chart 2",
+      title: "Top 15 Categories by Revenue",
+      subtitle: "Revenue is diversified across verticals; Beauty & Health, Watches & Gifts, and Home lead.",
+      chartId: "categories",
+      finding: "Prioritize high-revenue categories for promotions and assortment."
+    },
+    {
+      type: "chart",
+      kicker: "Business findings · Chart 3",
+      title: "Customer Segments – Revenue & Share",
+      subtitle: "Established and Loyal customers drive most revenue; average revenue per customer is stable across segments.",
+      chartId: "segments",
+      finding: "Retention and engagement of Established/Loyal segments are critical."
+    },
+    {
+      type: "chart",
+      kicker: "Business findings · Chart 4",
+      title: "On-Time vs Late Delivery",
+      subtitle: "~93.4% of delivered items are on time; ~6.6% late still represent meaningful revenue and customer risk.",
+      chartId: "late",
+      finding: "SLA monitoring and carrier scorecards can reduce late deliveries and protect satisfaction."
+    },
+    {
+      kicker: "Slide 14",
+      title: "Quality, Orchestration & Next Steps",
+      subtitle: "Data quality checks, orchestrated flows, and roadmap for expanding analytics and reliability.",
+      left: {
+        heading: "Quality & orchestration",
+        items: [
+          "data_quality/ge_raw_order_items.py validates keys and numeric ranges; optional Great Expectations suite.",
+          "dbt test enforces schema and relational integrity.",
+          "Prefect (flow.py) and Dagster (olist_elt_job) run: ingest → dbt run → dbt test → quality."
+        ]
+      },
+      right: {
+        heading: "Next steps",
+        items: [
+          "Add dashboards (Looker Studio / Power BI) on top of dw_dw.",
+          "Extend metrics: NPS, delivery time distributions, regional breakdowns, cohorts.",
+          "Add monitoring/alerts for Dagster job runs and BigQuery costs."
+        ],
+        tags: ["Monitoring", "Dashboards", "Roadmap"]
+      }
+    }
+  ];
+
+  const slideEl = document.getElementById("slide-inner");
+  const slideSection = document.getElementById("slide");
+  const slideIndexEl = document.getElementById("slide-index");
+  const prevBtn = document.getElementById("prev-btn");
+  const nextBtn = document.getElementById("next-btn");
+
+  let current = 0;
+  let chartInstance = null;
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        labels: { color: "#a1a5c2", font: { size: 14 } }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: "#a1a5c2", font: { size: 12 } },
+        grid: { color: "rgba(255,255,255,0.06)" }
+      },
+      y: {
+        ticks: { color: "#a1a5c2", font: { size: 12 } },
+        grid: { color: "rgba(255,255,255,0.06)" }
+      }
+    }
+  };
+
+  function drawChart(chartId) {
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+        }
+    const canvas = document.getElementById("chart-" + chartId);
+    if (!canvas || typeof Chart === "undefined") return;
+
+    const ctx = canvas.getContext("2d");
+    const accent = "#6df0ff";
+    const colors = ["#6df0ff", "#ff6b8b", "#6bffb1", "#c9a0ff", "#ffb86b", "#7ee8fa", "#a78bfa", "#34d399", "#f472b6", "#818cf8", "#4ade80", "#fb923c", "#22d3ee", "#e879f9", "#a3e635"];
+
+    if (chartId === "monthly") {
+      const labels = ["2016-09", "2016-10", "2016-11", "2016-12", "2017-01", "2017-02", "2017-03", "2017-04", "2017-05", "2017-06", "2017-07", "2017-08", "2017-09", "2017-10", "2017-11", "2017-12", "2018-01", "2018-02", "2018-03", "2018-04", "2018-05", "2018-06", "2018-07", "2018-08"];
+      const data = [12, 45, 98, 180, 220, 310, 380, 420, 480, 520, 580, 620, 680, 750, 820, 900, 720, 650, 710, 680, 720, 690, 710, 680];
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{ label: "Revenue (R$k)", data: data, backgroundColor: "rgba(109, 240, 255, 0.5)", borderColor: accent, borderWidth: 1 }]
+        },
+        options: Object.assign({}, chartOptions, {
+          scales: {
+            x: Object.assign({}, chartOptions.scales.x, { maxTicksLimit: 14 }),
+            y: chartOptions.scales.y
+          }
+        })
+      });
+    } else if (chartId === "categories") {
+      const labels = ["beleza_saude", "relogios_presentes", "cama_mesa_banho", "esporte_lazer", "informatica_acessorios", "moveis_decoracao", "utilidades_domesticas", "ferramentas_jardim", "perfumaria", "brinquedos", "automotivo", "cool_stuff", "papelaria", "eletrodomesticos", "casa_construcao"];
+      const data = [1.42, 1.22, 1.18, 1.08, 0.98, 0.92, 0.88, 0.82, 0.78, 0.72, 0.68, 0.64, 0.58, 0.54, 0.50];
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{ label: "Revenue (R$M)", data: data, backgroundColor: colors.slice(0, 15), borderColor: "rgba(255,255,255,0.15)", borderWidth: 1 }]
+        },
+        options: Object.assign({}, chartOptions, { indexAxis: "y" })
+      });
+    } else if (chartId === "segments") {
+      chartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Established", "Loyal", "New"],
+          datasets: [{
+            data: [9.4, 4.8, 1.6],
+            backgroundColor: [accent, "#ff6b8b", "#6bffb1"],
+            borderColor: ["#0b1024", "#0b1024", "#0b1024"],
+            borderWidth: 2
+          }]
+        },
+        options: Object.assign({}, chartOptions, {
+          plugins: {
+            legend: { position: "right" },
+            tooltip: { callbacks: { label: function(ctx) { return ctx.label + ": R$" + ctx.raw + "M (" + (ctx.raw / 15.8 * 100).toFixed(0) + "%)"; } } }
+          }
+        })
+      });
+    } else if (chartId === "late") {
+      chartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["On time (93.4%)", "Late (6.6%)"],
+          datasets: [{
+            data: [93.4, 6.6],
+            backgroundColor: ["#6bffb1", "#ff6b8b"],
+            borderColor: ["#0b1024", "#0b1024"],
+            borderWidth: 2
+          }]
+        },
+        options: Object.assign({}, chartOptions, {
+          plugins: {
+            legend: { position: "right" },
+            tooltip: { callbacks: { label: function(ctx) { return ctx.label + " — " + ctx.raw + "% of delivered items"; } } }
+          }
+        })
+      });
+    }
+  }
+
+  function renderSlide(index) {
+    const s = slides[index];
+    slideEl.innerHTML = "";
+    slideSection.classList.toggle("slide-chart", s.type === "chart");
+
+    const kicker = document.createElement("div");
+    kicker.className = "slide-kicker";
+    kicker.textContent = s.kicker || "Slide " + (index + 1);
+    slideEl.appendChild(kicker);
+
+    const title = document.createElement("div");
+    title.className = "slide-title";
+    title.textContent = s.title;
+    slideEl.appendChild(title);
+
+    if (s.subtitle) {
+      const subtitle = document.createElement("div");
+      subtitle.className = "slide-subtitle";
+      subtitle.textContent = s.subtitle;
+      slideEl.appendChild(subtitle);
+    }
+
+    if (s.type === "chart") {
+      const body = document.createElement("div");
+      body.className = "slide-body";
+      const chartWrap = document.createElement("div");
+      chartWrap.className = "chart-wrap";
+      const canvas = document.createElement("canvas");
+      canvas.id = "chart-" + s.chartId;
+      chartWrap.appendChild(canvas);
+      body.appendChild(chartWrap);
+      if (s.finding) {
+        const finding = document.createElement("p");
+        finding.className = "chart-finding";
+        finding.textContent = "→ " + s.finding;
+        body.appendChild(finding);
+      }
+      slideEl.appendChild(body);
+      requestAnimationFrame(function() { drawChart(s.chartId); });
+    } else {
+      const body = document.createElement("div");
+      body.className = "slide-body";
+
+      const leftCol = document.createElement("div");
+      leftCol.className = "col";
+      const lh = document.createElement("h3");
+      lh.textContent = s.left.heading || "Details";
+      leftCol.appendChild(lh);
+      if (s.left.items) {
+        const ul = document.createElement("ul");
+        s.left.items.forEach(function(t) {
+          const li = document.createElement("li");
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+        leftCol.appendChild(ul);
+      }
+      body.appendChild(leftCol);
+
+      const rightCol = document.createElement("div");
+      rightCol.className = "col";
+      const rh = document.createElement("h3");
+      rh.textContent = s.right.heading || "Highlights";
+      rightCol.appendChild(rh);
+
+      if (s.right.metrics) {
+        s.right.metrics.forEach(function(m) {
+          const box = document.createElement("div");
+          box.className = "metric";
+          const ml = document.createElement("div");
+          ml.className = "metric-label";
+          ml.textContent = m.label;
+          const mv = document.createElement("div");
+          mv.className = "metric-value";
+          mv.textContent = m.value;
+          const mn = document.createElement("div");
+          mn.className = "metric-note";
+          mn.textContent = m.note || "";
+          box.appendChild(ml);
+          box.appendChild(mv);
+          box.appendChild(mn);
+          rightCol.appendChild(box);
+        });
+      }
+
+      if (s.right.items) {
+        const ul = document.createElement("ul");
+        s.right.items.forEach(function(t) {
+          const li = document.createElement("li");
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+        rightCol.appendChild(ul);
+      }
+
+      if (s.right.tags) {
+        const tagWrap = document.createElement("div");
+        tagWrap.className = "tag-list";
+        s.right.tags.forEach(function(t) {
+          const span = document.createElement("span");
+          span.className = "tag";
+          span.textContent = t;
+          tagWrap.appendChild(span);
+        });
+        rightCol.appendChild(tagWrap);
+      }
+
+      body.appendChild(rightCol);
+      slideEl.appendChild(body);
+    }
+
+    slideIndexEl.textContent = "Slide " + (index + 1) + " / " + slides.length;
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === slides.length - 1;
+  }
+
+  function go(delta) {
+    const next = current + delta;
+    if (next < 0 || next >= slides.length) return;
+    current = next;
+    renderSlide(current);
+  }
+
+  prevBtn.addEventListener("click", function() { go(-1); });
+  nextBtn.addEventListener("click", function() { go(1); });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      go(1);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      go(-1);
+    }
+  });
+
+  // Mouse wheel / touchpad scrolling to flip slides
+  let scrollLock = false;
+  document.addEventListener("wheel", function(e) {
+    if (scrollLock) return;
+    if (Math.abs(e.deltaY) < 5) return;
+    scrollLock = true;
+    if (e.deltaY > 0) {
+      go(1);
+    } else {
+      go(-1);
+    }
+    setTimeout(function() { scrollLock = false; }, 350);
+  }, { passive: true });
+
+  renderSlide(current);
+</script>
+</body>
+</html>
