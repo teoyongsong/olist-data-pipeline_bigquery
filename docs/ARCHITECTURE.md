@@ -149,6 +149,27 @@ In text:
 
 ---
 
+### 4.1 Publishing dbt documentation (GitHub Pages)
+
+By default, dbt writes generated docs into `dbt_olist/target/` (ignored by git). To make the docs visible to GitHub repo viewers, this project publishes a copy under `docs/dbt/`, which can be served by GitHub Pages.
+
+- **Generate docs**
+  - Run the Dagster job (includes `dbt docs generate`) or run locally:
+    - `cd dbt_olist && dbt docs generate`
+
+- **Publish docs to GitHub Pages**
+  - Copy the generated site bundle:
+    - `cp -R dbt_olist/target/* docs/dbt/`
+  - Commit + push `docs/dbt/`.
+
+- **View**
+  - Locally:
+    - `cd docs/dbt && python3 -m http.server 8000` then open `http://localhost:8000/index.html`
+  - On GitHub Pages (if configured to serve `/docs`):
+    - `.../dbt/index.html`
+
+---
+
 ### 5. How the three core metrics map to the architecture
 
 - **Monthly revenue trend**

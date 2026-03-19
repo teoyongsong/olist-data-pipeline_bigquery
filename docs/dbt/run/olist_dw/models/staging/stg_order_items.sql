@@ -1,0 +1,21 @@
+
+
+  create or replace view `olistdatapipelinebigquery`.`dw_stg_olist`.`stg_order_items`
+  OPTIONS()
+  as with source as (
+    select * from `olistdatapipelinebigquery`.`raw_olist`.`order_items`
+),
+
+renamed as (
+    select
+        order_id,
+        order_item_id,
+        product_id,
+        seller_id,
+        cast(price as numeric) as price,
+        cast(freight_value as numeric) as freight_value
+    from source
+)
+
+select * from renamed;
+
