@@ -1,7 +1,8 @@
 """
 Dagster definitions for the Olist BigQuery pipeline.
 
-Pipeline: ingest (local or GCS) -> dbt run -> dbt test -> data_quality.
+Pipeline (Dagster-orchestrated):
+  ingest (local or GCS) -> dbt run -> dbt test (store failures) -> data_quality -> dbt docs generate.
 
 Run:
   cd olist-data-pipeline_bigquery
@@ -56,6 +57,11 @@ def ingest_op(context):
         if use_gcs
         else "ingestion/ingest_raw_olist.py"
     )
+    if not use_gcs:
+        context.log.warning(
+            "Using local-drive ingestion (USE_GCS_INGEST is false). "
+            "If you expected a Kaggle extractor, it is bypassed in this pipeline."
+        )
     context.log.info(f"Running ingestion: {script} (USE_GCS_INGEST={use_gcs})")
     _run([sys.executable, script])
 
@@ -67,7 +73,9 @@ def dbt_run_op(_previous):  # noqa: ARG001 - dependency only, no data passed
 
 @op
 def dbt_test_op(_previous):  # noqa: ARG001 - dependency only
-    _run(["dbt", "test"], cwd=DBT_DIR)
+    # Store failures so test failures are materialized (helps isolate root causes)
+    # Note: this is safe even if there are no failures.
+    _run(["dbt", "test", "--store-failures"], cwd=DBT_DIR)
 
 
 @op
@@ -75,10 +83,16 @@ def data_quality_op(_previous):  # noqa: ARG001 - dependency only
     _run([sys.executable, "data_quality/ge_raw_order_items.py"], cwd=ROOT_DIR)
 
 
+@op
+def dbt_docs_op(_previous):  # noqa: ARG001 - dependency only
+    """Generate dbt docs artifacts (manifest/catalog), used by downstream analysis tooling."""
+    _run(["dbt", "docs", "generate"], cwd=DBT_DIR)
+
+
 @job
 def olist_elt_job():
-    """Full pipeline: ingest -> dbt run -> dbt test -> data_quality."""
-    data_quality_op(dbt_test_op(dbt_run_op(ingest_op())))
+    """Full pipeline: ingest -> dbt run -> dbt test (store failures) -> data_quality -> dbt docs."""
+    dbt_docs_op(data_quality_op(dbt_test_op(dbt_run_op(ingest_op()))))
 
 
 olist_daily_schedule = ScheduleDefinition(

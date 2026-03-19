@@ -50,7 +50,8 @@ In text:
   - Dataset `raw_olist`: raw tables loaded 1:1 from CSVs.
   - Dataset `dw_stg_olist`: dbt staging views.
   - Dataset `dw_dw`: dbt star-schema marts:
-    - `dim_customer`, `dim_product`, `dim_seller`, `dim_date`, `fact_order_items`.
+    - `dim_customer`, `dim_product`, `dim_seller`, `dim_date`, `fact_order_items`, `fact_orders`.
+    - `fact_orders` is built with an **aggregate first → then join** pattern (one row per order; use for order-level analytics and benchmarks).
 
 - **dbt (`dbt_olist/`)**
   - Reads from `raw_olist` via `models/sources.yml`.
